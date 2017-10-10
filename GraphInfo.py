@@ -1,5 +1,5 @@
 import json
-import request
+import requests
 
 class Node:
     def __init__(self, id, label, role, root):
@@ -40,7 +40,7 @@ class Channel:
                 users[member] = User(len(users), member, usernames[member])
 
     def get_nodes(self, users, nodes, edges, usernames):
-        nodes[self.slack_id] = Node(len(nodes), self.name, self.role, self.root)
+        #nodes[self.slack_id] = Node(len(nodes), self.name, self.role, self.root)
 
         for member in self.members:
             if not member in nodes:
@@ -49,13 +49,13 @@ class Channel:
     def get_edges(self, users, nodes, edges, usernames):
         size = len(self.members)
 
-        for index in range(0, size):
-            member = self.members[index]
-            if not (member, self.slack_id) in edges and not (self.slack_id, member) in edges:
-                edges[(member, self.slack_id)] = Edge(nodes[member].id, nodes[self.slack_id].id, 'join')
-                nodes[member].degree += 1
-                nodes[self.slack_id].degree += 1
-            # one person can only be in a channel once do need to increment the weight
+        #for index in range(0, size):
+        #    member = self.members[index]
+        #    if not (member, self.slack_id) in edges and not (self.slack_id, member) in edges:
+        #        edges[(member, self.slack_id)] = Edge(nodes[member].id, nodes[self.slack_id].id, 'join')
+        #        nodes[member].degree += 1
+        #        nodes[self.slack_id].degree += 1
+        #    # one person can only be in a channel once do need to increment the weight
 
         for index1 in range(0, size - 1):
             for index2 in range(index1 + 1, size):
@@ -157,8 +157,10 @@ def get_usernames(url):
         if r['ok'] == True:
             for member in r['members']:
                 usernames[member['id']] = member['name']
+        else:
+            return (False, {})
 
-    return usernames
+    return (True, usernames)
 
 def get_channels(url):
     channels = []
@@ -196,8 +198,10 @@ def get_channels(url):
                 channel_index = +1
                 #made up channels
                 channels.append(Channel(channel_id + 1, channel_slack_id + '2', channel_name + '2', channel_members))
+        else:
+            return (False, {})
 
-    return channels
+    return (True, channels)
 
 def get_team(url):
     team = None
@@ -205,22 +209,21 @@ def get_team(url):
         r = response.json()
         if r['ok'] == True:
             team = Team(0, r['team']['id'], r['team']['name'])
+        else:
+            return (False, None)
 
-    return team
+    return (True, team)
 
-def do_it(api_key = 'xoxp-26396834129-26391238262-250871791041-173fb00b94a4c7ef372c9c5def3a1e91', threshold = '0', sna_metric = 'eigen vector'):
-    #api_key = 'xoxp-26396834129-26391238262-250871791041-173fb00b94a4c7ef372c9c5def3a1e91'
-    #api_key = input('enter api key: ')
-
+def do_it(api_key, threshold = '0', sna_metric = 'eigen vector'):
     users = {}
     nodes = {}
     edges = {}
 
-    team_info = get_team('https://slack.com/api/team.info?token={}&pretty=1'.format(api_key))
-    nodes[team_info.slack_id] = Node(team_info.id, team_info.name, team_info.role, team_info.root)
+    ret, team_info = get_team('https://slack.com/api/team.info?token={}&pretty=1'.format(api_key))
+    #nodes[team_info.slack_id] = Node(team_info.id, team_info.name, team_info.role, team_info.root)
 
-    channels = get_channels('https://slack.com/api/channels.list?token={}&pretty=1'.format(api_key))
-    usernames = get_usernames('https://slack.com/api/users.list?token={}&pretty=1'.format(api_key))
+    ret, channels = get_channels('https://slack.com/api/channels.list?token={}&pretty=1'.format(api_key))
+    ret, usernames = get_usernames('https://slack.com/api/users.list?token={}&pretty=1'.format(api_key))
 
     usernames['U6344ASD11'] = 'aaaaaa'
     usernames['U8764VFD21'] = 'bbbbbb'
@@ -239,12 +242,13 @@ def do_it(api_key = 'xoxp-26396834129-26391238262-250871791041-173fb00b94a4c7ef3
         channel.get_users(users, nodes, edges, usernames)
         channel.get_nodes(users, nodes, edges, usernames)
 
-        edges[(channel.slack_id, team_info.slack_id)] = Edge(nodes[channel.slack_id].id, nodes[team_info.slack_id].id, 'in')
-        nodes[channel.slack_id].degree += 1
-        nodes[team_info.slack_id].degree += 1
+        #edges[(channel.slack_id, team_info.slack_id)] = Edge(nodes[channel.slack_id].id, nodes[team_info.slack_id].id, 'in')
+        #nodes[channel.slack_id].degree += 1
+        #nodes[team_info.slack_id].degree += 1
 
         channel.get_edges(users, nodes, edges, usernames)
 
     graph_info = MyGraph(nodes, edges, threshold, sna_metric)
-    json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'adj': graph_info.adj, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
+    json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
+    #json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'adj': graph_info.adj, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
     return json_data
