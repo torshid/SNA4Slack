@@ -1,0 +1,250 @@
+import json
+import request
+
+class Node:
+    def __init__(self, id, label, role, root):
+        self.id = id
+        self.label = label
+        self.role = role
+        self.root = root
+        self.degree = 0
+        self.eigenvalue = 1
+
+class Edge:
+    def __init__(self, source, target, label):
+        self.source = source
+        self.target = target
+        self.label = label
+        self.weight = 1
+
+class User:
+    def __init__(self, id, slack_id, name, role = 'user', root = False):
+        self.id = id
+        self.slack_id = slack_id
+        self.name = name
+        self.role = role
+        self.root = root
+
+class Channel:
+    def __init__(self, id, slack_id, name, members, role = 'channel', root = True):
+        self.id = id
+        self.slack_id = id
+        self.name = name
+        self.members = members
+        self.role = role
+        self.root = root
+
+    def get_users(self, users, nodes, edges, usernames):
+        for member in self.members:
+            if not member in users:
+                users[member] = User(len(users), member, usernames[member])
+
+    def get_nodes(self, users, nodes, edges, usernames):
+        nodes[self.slack_id] = Node(len(nodes), self.name, self.role, self.root)
+
+        for member in self.members:
+            if not member in nodes:
+                nodes[member] = Node(len(nodes), users[member].name, users[member].role, users[member].root)
+
+    def get_edges(self, users, nodes, edges, usernames):
+        size = len(self.members)
+
+        for index in range(0, size):
+            member = self.members[index]
+            if not (member, self.slack_id) in edges and not (self.slack_id, member) in edges:
+                edges[(member, self.slack_id)] = Edge(nodes[member].id, nodes[self.slack_id].id, 'join')
+                nodes[member].degree += 1
+                nodes[self.slack_id].degree += 1
+            # one person can only be in a channel once do need to increment the weight
+
+        for index1 in range(0, size - 1):
+            for index2 in range(index1 + 1, size):
+                member1 = self.members[index1]
+                member2 = self.members[index2]
+
+                if not (member1, member2) in edges and not (member2, member1) in edges:
+                    edges[(member1, member2)] = Edge(nodes[member1].id, nodes[member2].id, 'contact')
+                    nodes[member1].degree += 1
+                    nodes[member2].degree += 1
+                elif (member1, member2) in edges:
+                    edges[(member1, member2)].weight += 1
+                elif (member2, member1) in edges:
+                    edges[(member2, member1)].weight += 1
+
+class Team:
+    def __init__(self, id, slack_id, name, role = 'team', root = True):
+        self.id = id
+        self.slack_id = slack_id
+        self.name = name
+        self.role = role
+        self.root = root
+
+## degree: number of links
+## often used as measure of a node's degree of connectedness and
+## hence also influence and/or popularity
+## useful in assessing which nodes are central with respect to
+## spreading information and influencing others in their
+## immediate 'neighborhood'
+
+## path: a path between two nodes is any sequence
+## of non-repeating nodes that connects the two nodes
+## shortest path is the distance between nodes
+## shorter paths are desirable when speed of communication or exchange is desired
+
+## eigen vector: a nodes's eigen vector is proportional
+## to the sum of the eigenvector of all nodes directly connected to it
+## in other words, a node with a high eigen vector is connected to
+## other nodes with high eigen vector
+## similar to Google ranks web pages, links from highly linked-to pages count more
+## useful in determining who is connected to the most connected nodes
+
+class MyGraph:
+    def __init__(self, nodes, edges, threshold, sna_metric):
+        self.nodes = []
+        self.edges = []
+        self.adj = []
+        self.degrees = []
+        self.eigenvalues = []
+        self.weights = []
+        self.threshold = int(threshold)
+        self.sna_metric = sna_metric
+
+        #nodes -> string(node name) to Node object
+        #edges -> string(node name), string(node name) to Edge object
+
+        #self.nodes -> index to dict
+        #self.edges -> index to dict
+        #self.adj -> 2d int matrix
+        #self.degrees -> index to int
+        #self.eigenvalues -> index to int
+        #self.weights -> index to int
+
+        for node in nodes:
+            if nodes[node].role == 'channel' or nodes[node].role == 'team':
+                self.nodes.append({'id': nodes[node].id, 'caption': nodes[node].label, 'role': nodes[node].role, 'root': nodes[node].root})
+            elif nodes[node].role == 'user':
+                if nodes[node].degree > self.threshold:
+                    self.nodes.append({'id': nodes[node].id, 'caption': nodes[node].label, 'role': nodes[node].role, 'root': nodes[node].root})
+
+        for (node1, node2) in edges:
+            self.edges.append({'source': edges[(node1, node2)].source, 'target': edges[(node1, node2)].target, 'caption': edges[(node1, node2)].label})
+            self.weights.append(edges[(node1, node2)].weight)
+
+        # look  if networkx has eigen vector, path length and degree
+        for node1 in nodes:
+            node1_adj_matrix = []
+            for node2 in nodes:
+                if (node1, node2) in edges:
+                    node1_adj_matrix.append(1)
+                else:
+                    node1_adj_matrix.append(0)
+            self.adj.append(node1_adj_matrix)
+
+        for i in range(0, 10):# 10 -> iteration number, epsilon can be used as well
+            for node1 in nodes:
+                for node2 in nodes:#transpoze -> self.adj[nodes[node2].id][nodes[node1].id]
+                    nodes[node1].eigenvalue += self.adj[nodes[node1].id][nodes[node2].id] / nodes[node1].degree
+
+        for node in nodes:
+            self.degrees.append(nodes[node].degree)
+            self.eigenvalues.append(nodes[node].eigenvalue)
+
+def get_usernames(url):
+    usernames = {}
+
+    with requests.get(url) as response:
+        r = response.json()
+        if r['ok'] == True:
+            for member in r['members']:
+                usernames[member['id']] = member['name']
+
+    return usernames
+
+def get_channels(url):
+    channels = []
+
+    with requests.get(url) as response:
+        r = response.json()
+        if r['ok'] == True:
+            channel_index = 0
+            for channel_info in r['channels']:
+                channel_id = len(channels)
+                channel_slack_id = channel_info['id']
+                channel_name = channel_info['name']
+                channel_members = channel_info['members']
+
+                #actual channels
+                channels.append(Channel(channel_id, channel_slack_id, channel_name, channel_members))
+    
+                #channel_members = []
+                
+                if channel_index == 0:
+                    channel_members.append('U6344ASD11')
+                    channel_members.append('U8764VFD21')
+                    channel_members.append('UBFG54BN31')
+                    channel_members.append('U87543NN41')
+                    channel_members.append('U876454N51')
+                    channel_members.append('UKINFGB161')
+                elif channel_index == 1:
+                    channel_members.append('U6344ASD12')
+                    channel_members.append('U8764VFD22')
+                    channel_members.append('UBFG54BN32')
+                    channel_members.append('U87543NN42')
+                    channel_members.append('U876454N52')
+                    channel_members.append('UKINFGB162')
+
+                channel_index = +1
+                #made up channels
+                channels.append(Channel(channel_id + 1, channel_slack_id + '2', channel_name + '2', channel_members))
+
+    return channels
+
+def get_team(url):
+    team = None
+    with requests.get(url) as response:
+        r = response.json()
+        if r['ok'] == True:
+            team = Team(0, r['team']['id'], r['team']['name'])
+
+    return team
+
+def do_it(api_key = 'xoxp-26396834129-26391238262-250871791041-173fb00b94a4c7ef372c9c5def3a1e91', threshold = '0', sna_metric = 'eigen vector'):
+    #api_key = 'xoxp-26396834129-26391238262-250871791041-173fb00b94a4c7ef372c9c5def3a1e91'
+    #api_key = input('enter api key: ')
+
+    users = {}
+    nodes = {}
+    edges = {}
+
+    team_info = get_team('https://slack.com/api/team.info?token={}&pretty=1'.format(api_key))
+    nodes[team_info.slack_id] = Node(team_info.id, team_info.name, team_info.role, team_info.root)
+
+    channels = get_channels('https://slack.com/api/channels.list?token={}&pretty=1'.format(api_key))
+    usernames = get_usernames('https://slack.com/api/users.list?token={}&pretty=1'.format(api_key))
+
+    usernames['U6344ASD11'] = 'aaaaaa'
+    usernames['U8764VFD21'] = 'bbbbbb'
+    usernames['UBFG54BN31'] = 'cccccc'
+    usernames['U87543NN41'] = 'dddddd'
+    usernames['U876454N51'] = 'eeeeee'
+    usernames['UKINFGB161'] = 'ffffff'
+    usernames['U6344ASD12'] = 'gggggg'
+    usernames['U8764VFD22'] = 'hhhhhh'
+    usernames['UBFG54BN32'] = 'iiiiii'
+    usernames['U87543NN42'] = 'jjjjjj'
+    usernames['U876454N52'] = 'kkkkkk'
+    usernames['UKINFGB162'] = 'llllll'
+
+    for channel in channels:
+        channel.get_users(users, nodes, edges, usernames)
+        channel.get_nodes(users, nodes, edges, usernames)
+
+        edges[(channel.slack_id, team_info.slack_id)] = Edge(nodes[channel.slack_id].id, nodes[team_info.slack_id].id, 'in')
+        nodes[channel.slack_id].degree += 1
+        nodes[team_info.slack_id].degree += 1
+
+        channel.get_edges(users, nodes, edges, usernames)
+
+    graph_info = MyGraph(nodes, edges, threshold, sna_metric)
+    json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'adj': graph_info.adj, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
+    return json_data
