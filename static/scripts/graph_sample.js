@@ -1,8 +1,16 @@
 //taken from https://bl.ocks.org/mbostock/4062045
 
-var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+  /*
+   * Select all of the SVG elements on the page and parse out their viewBox
+   * attributes to determine their aspect ratios.
+   */
+
+var viewBox = d3.select("svg").attr("viewBox").split(" "),
+          size = viewBox.slice(2),
+          width = size[0],
+          height = size[1];
+
+var svg = d3.select("svg");
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
