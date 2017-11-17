@@ -1,5 +1,6 @@
 import json
 import requests
+import networkx as nx
 
 class Node:
     def __init__(self, id, label, role, root):
@@ -214,7 +215,7 @@ def get_team(url):
 
     return (True, team)
 
-def do_it(api_key, threshold = '0', sna_metric = 'eigen vector'):
+def do_it(api_key, threshold = '0', sna_metric = 'degree'):
     users = {}
     nodes = {}
     edges = {}
@@ -249,6 +250,28 @@ def do_it(api_key, threshold = '0', sna_metric = 'eigen vector'):
         channel.get_edges(users, nodes, edges, usernames)
 
     graph_info = MyGraph(nodes, edges, threshold, sna_metric)
-    json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
+
+
+    # change information taken from slack to networkx graph
+    # modify data structure
+
+    G = nx.Graph()
+    elist = []
+    # when adding weight use G.add_weighted_edges_from(elist)
+    # and make elist[("a","b", 2.0)]
+    for edge in graph_info.edges:
+        elist.append((edge["source"],edge["target"]))
+    G.add_edges_from(elist)
+    
+
+    if sna_metric == "degree":
+        json_data = nx.degree_centrality(G)
+    elif sna_metric == "eigenvector":
+        json_data = nx.eigenvector_centrality(G)
+    elif sna_metric == "shortest":
+        json_data = nx.betweenness_centrality(G)
+    else:
+        json_data = json.dumps({'error':'name error'})
+    #json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
     #json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'adj': graph_info.adj, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
     return json_data
