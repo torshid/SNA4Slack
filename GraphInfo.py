@@ -130,6 +130,7 @@ class MyGraph:
         for (node1, node2) in edges:
             self.edges.append({'source': edges[(node1, node2)].source, 'target': edges[(node1, node2)].target, 'caption': edges[(node1, node2)].label})
             self.weights.append(edges[(node1, node2)].weight)
+            
 
         # look  if networkx has eigen vector, path length and degree
         for node1 in nodes:
@@ -251,27 +252,25 @@ def do_it(api_key, threshold = '0', sna_metric = 'degree'):
 
     graph_info = MyGraph(nodes, edges, threshold, sna_metric)
 
-
     # change information taken from slack to networkx graph
     # modify data structure
-
     G = nx.Graph()
     elist = []
+    sna_data = {}
+
     # when adding weight use G.add_weighted_edges_from(elist)
     # and make elist[("a","b", 2.0)]
     for edge in graph_info.edges:
         elist.append((edge["source"],edge["target"]))
     G.add_edges_from(elist)
-    
 
-    if sna_metric == "degree":
-        json_data = nx.degree_centrality(G)
-    elif sna_metric == "eigenvector":
-        json_data = nx.eigenvector_centrality(G)
-    elif sna_metric == "shortest":
-        json_data = nx.betweenness_centrality(G)
-    else:
-        json_data = json.dumps({'error':'name error'})
-    #json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
+    if sna_metric == "Degree":
+        sna_data["degree"] = nx.degree_centrality(G)
+    elif sna_metric == "Eigenvector":
+        sna_data["eigenvector"] = nx.eigenvector_centrality(G)
+    elif sna_metric == "Shortest Path":
+        sna_data["shortest"] = nx.betweenness_centrality(G)
+
+    json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights, 'sna-metric': sna_data}, indent = 4, sort_keys = True)
     #json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'adj': graph_info.adj, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
     return json_data
