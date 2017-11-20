@@ -1,14 +1,13 @@
-from flask import current_app, render_template, jsonify
 from common import *
 
 page = Blueprint(__name__)
 
 
-@page.route('/graphs/path')
+@page.route('/graphs/path', methods=['POST', 'GET'])
 def main():
-    return render_template('graph_path.html')
+    return call_graph('path')
 
 
-@page.route('/graphs/path.json')
+@page.route('/graphs/path.json', methods=['POST'])
 def json():
-    return jsonify()
+    return get_json('path')

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %} {% block graph %} Graph Type {% endblock %} {% endblock %}
+{% block body %}
+<div class="app">
+    <div class="mt-3">
+        <h1>{{ self.graph() }}</h1>
+    </div>
+    <svg class="app-content">
+    </svg>
+</div>
+<script>
+    var key = '{{ key }}';
+    var threshold = {{ threshold }};
+
+</script>
+{% endblock %}

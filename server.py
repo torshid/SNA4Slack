@@ -1,18 +1,11 @@
+from flask import Flask, render_template, request
 from werkzeug.exceptions import NotFound, Forbidden
-from flask import Flask, app, render_template, request
-from GraphInfo import do_it
-from common import *
-from config import *
+
 import jinja
+from GraphInfo import do_it
+from config import *
 
 app = Flask(__name__)
-
-@app.route("/")
-def hello():
-    json_data = do_it(api_key='API KEY HERE',threshold = 0,sna_metric = 'Degree')
-    # json_data content is empty because of api key, but keys can be examined
-    print(json_data)
-    return render_template('home.html')
 
 @app.route('/show', methods = ['POST', 'GET'])
 def show():
