@@ -12,8 +12,12 @@ def valid_metric(metric):
 
 
 def call_graph(metric):
-    if not valid_metric(metric) or 'key' not in flask.request.form or 'threshold' not in flask.request.form:
+    if not valid_metric(metric):
         return flask.redirect(flask.url_for('entities.home.main'))
+    if 'key' not in flask.request.form or 'threshold' not in flask.request.form:
+        return flask.render_template('graph_' + metric + '.html',
+                                     key='',
+                                     threshold='')
     return flask.render_template('graph_' + metric + '.html',
                                  key=flask.request.form['key'],
                                  threshold=flask.request.form['threshold'])
