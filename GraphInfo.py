@@ -3,13 +3,14 @@ import requests
 import networkx as nx
 
 class Node:
-    def __init__(self, id, label, role, root):
+    def __init__(self, id, label, role, root, radius):
         self.id = id
         self.label = label
         self.role = role
         self.root = root
         self.degree = 0
         self.eigenvalue = 1
+        self.radius = 1
 
 class Edge:
     def __init__(self, source, target, label):
@@ -45,7 +46,7 @@ class Channel:
 
         for member in self.members:
             if not member in nodes:
-                nodes[member] = Node(len(nodes), users[member].name, users[member].role, users[member].root)
+                nodes[member] = Node(len(nodes), users[member].name, users[member].role, users[member].root,1)
 
     def get_edges(self, users, nodes, edges, usernames):
         size = len(self.members)
@@ -122,13 +123,13 @@ class MyGraph:
 
         for node in nodes:
             if nodes[node].role == 'channel' or nodes[node].role == 'team':
-                self.nodes.append({'id': nodes[node].id, 'caption': nodes[node].label, 'role': nodes[node].role, 'root': nodes[node].root})
+                self.nodes.append({'id': nodes[node].id, 'caption': nodes[node].label, 'role': nodes[node].role, 'root': nodes[node].root, 'radius': '1'})
             elif nodes[node].role == 'user':
                 if nodes[node].degree > self.threshold:
-                    self.nodes.append({'id': nodes[node].id, 'caption': nodes[node].label, 'role': nodes[node].role, 'root': nodes[node].root})
+                    self.nodes.append({'id': nodes[node].id, 'caption': nodes[node].label, 'role': nodes[node].role, 'root': nodes[node].root, 'radius': '1'})
 
         for (node1, node2) in edges:
-            self.edges.append({'source': edges[(node1, node2)].source, 'target': edges[(node1, node2)].target, 'caption': edges[(node1, node2)].label})
+            self.edges.append({'source': edges[(node1, node2)].source, 'target': edges[(node1, node2)].target, 'caption': edges[(node1, node2)].label, 'width': edges[(node1, node2)].weight})
             self.weights.append(edges[(node1, node2)].weight)
             
 
@@ -216,7 +217,7 @@ def get_team(url):
 
     return (True, team)
 
-def do_it(api_key, threshold = '0', sna_metric = 'degree'):
+def do_it(api_key, threshold = '0', sna_metric = "Degree"):
     users = {}
     nodes = {}
     edges = {}
@@ -265,12 +266,18 @@ def do_it(api_key, threshold = '0', sna_metric = 'degree'):
     G.add_edges_from(elist)
 
     if sna_metric == "Degree":
-        sna_data["degree"] = nx.degree_centrality(G)
+        sna_data = nx.degree_centrality(G)
     elif sna_metric == "Eigenvector":
-        sna_data["eigenvector"] = nx.eigenvector_centrality(G)
+        sna_data = nx.eigenvector_centrality(G)
     elif sna_metric == "Shortest Path":
-        sna_data["shortest"] = nx.betweenness_centrality(G)
+        sna_data = nx.betweenness_centrality(G)
+    
+    for node in graph_info.nodes:
+        node["radius"] = sna_data[node["id"]]
 
-    json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights, 'sna-metric': sna_data}, indent = 4, sort_keys = True)
-    #json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'adj': graph_info.adj, 'degrees': graph_info.degrees, 'eigenvalues': graph_info.eigenvalues, 'weights': graph_info.weights}, indent = 4, sort_keys = True)
+    if any(i["radius"] < 0.25 for i in graph_info.nodes):
+        for node in graph_info.nodes:
+            node["radius"] *= 3
+
+    json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'weights': graph_info.weights, 'sna_metrics': sna_data}, indent = 4, sort_keys = True)
     return json_data
