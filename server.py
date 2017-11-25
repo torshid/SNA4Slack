@@ -31,7 +31,7 @@ def show():
 
     allFiles = [f for f in os.listdir(save_path) if os.path.isfile(os.path.join(save_path, f))]
     for f in allFiles:
-        if f != file_name:
+        if f != file_name and f != '.gitignore':
             try:
                 os.remove(os.path.join(save_path, f))
             except OSError as e:
