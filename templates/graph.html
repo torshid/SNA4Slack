@@ -1,0 +1,68 @@
+<html>
+    <head>
+      <link rel="stylesheet" href="static/bower_components/alchemyjs/dist/styles/vendor.css"/>
+      <link rel="stylesheet" href="static/bower_components/alchemyjs/dist/alchemy.css"/>
+    </head>
+    <body>
+      <div class="alchemy" id="alchemy"></div>
+      <script src="static/bower_components/alchemyjs/dist/scripts/vendor.js"></script>
+      <script src="static/bower_components/alchemyjs/dist/alchemy.js"></script>
+      <script type="text/javascript">
+    
+        var config = {
+            "dataSource": "static/graph_data/{{ file_name }}",
+            "forceLocked": false,
+            "nodeCaptionsOnByDefault": true,
+            "nodeCaption": "caption",
+            "linkDistance": function(){ return 40; },
+            "nodeTypes": {"role": ["team",
+                                   "channel",
+                                   "user"]},
+            "edgeTypes": {"caption": ["in",
+                                      "join",
+                                      "contact"]},
+            "nodeStyle": {
+                "team": {
+                    color: "#00ff0e",
+                },
+                "channel":{
+                    color: "#00ff0e",
+                    borderColor: "#00ffda"
+                },
+                "user": {
+                    color: "#ff7921",
+                    borderColor: "#fff",
+                    radius: function(d) {
+                        return d.getProperties().radius * 30
+                    },
+                    color: function (d) {
+                        return "rgba(255, 0, 0, " + 
+                        (d.getProperties().radius) + " )"
+                    }
+                }
+            },
+            "edgeStyle": {
+                "in": {
+                    color: "#00fffa",
+                    width: 5
+                },
+                "join": {
+                    color: "#ff00f3",
+                    borderWidth: 10
+                },
+                "contact": {
+                    color: "#ffffff",
+                    selected: {
+                        opacity: 1
+                    },
+                    width: function(d) {
+                        return d.getProperties().width * 2 
+                    }
+                }
+            }
+        };
+    
+        alchemy.begin(config);
+      </script>
+    </body>
+    </html>
