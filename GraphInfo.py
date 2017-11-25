@@ -131,7 +131,7 @@ class MyGraph:
         for (node1, node2) in edges:
             self.edges.append({'source': edges[(node1, node2)].source, 'target': edges[(node1, node2)].target, 'caption': edges[(node1, node2)].label, 'width': edges[(node1, node2)].weight})
             self.weights.append(edges[(node1, node2)].weight)
-            
+
 
         # look  if networkx has eigen vector, path length and degree
         for node1 in nodes:
@@ -155,65 +155,65 @@ class MyGraph:
 def get_usernames(url):
     usernames = {}
 
-    with requests.get(url) as response:
-        r = response.json()
-        if r['ok'] == True:
-            for member in r['members']:
-                usernames[member['id']] = member['name']
-        else:
-            return (False, {})
+    response = requests.get(url)
+    r = response.json()
+    if r['ok'] == True:
+        for member in r['members']:
+            usernames[member['id']] = member['name']
+    else:
+        return (False, {})
 
     return (True, usernames)
 
 def get_channels(url):
     channels = []
 
-    with requests.get(url) as response:
-        r = response.json()
-        if r['ok'] == True:
-            channel_index = 0
-            for channel_info in r['channels']:
-                channel_id = len(channels)
-                channel_slack_id = channel_info['id']
-                channel_name = channel_info['name']
-                channel_members = channel_info['members']
+    response = requests.get(url)
+    r = response.json()
+    if r['ok'] == True:
+        channel_index = 0
+        for channel_info in r['channels']:
+            channel_id = len(channels)
+            channel_slack_id = channel_info['id']
+            channel_name = channel_info['name']
+            channel_members = channel_info['members']
 
-                #actual channels
-                channels.append(Channel(channel_id, channel_slack_id, channel_name, channel_members))
-    
-                #channel_members = []
-                
-                if channel_index == 0:
-                    channel_members.append('U6344ASD11')
-                    channel_members.append('U8764VFD21')
-                    channel_members.append('UBFG54BN31')
-                    channel_members.append('U87543NN41')
-                    channel_members.append('U876454N51')
-                    channel_members.append('UKINFGB161')
-                elif channel_index == 1:
-                    channel_members.append('U6344ASD12')
-                    channel_members.append('U8764VFD22')
-                    channel_members.append('UBFG54BN32')
-                    channel_members.append('U87543NN42')
-                    channel_members.append('U876454N52')
-                    channel_members.append('UKINFGB162')
+            #actual channels
+            channels.append(Channel(channel_id, channel_slack_id, channel_name, channel_members))
 
-                channel_index = +1
-                #made up channels
-                channels.append(Channel(channel_id + 1, channel_slack_id + '2', channel_name + '2', channel_members))
-        else:
-            return (False, {})
+            #channel_members = []
+
+            if channel_index == 0:
+                channel_members.append('U6344ASD11')
+                channel_members.append('U8764VFD21')
+                channel_members.append('UBFG54BN31')
+                channel_members.append('U87543NN41')
+                channel_members.append('U876454N51')
+                channel_members.append('UKINFGB161')
+            elif channel_index == 1:
+                channel_members.append('U6344ASD12')
+                channel_members.append('U8764VFD22')
+                channel_members.append('UBFG54BN32')
+                channel_members.append('U87543NN42')
+                channel_members.append('U876454N52')
+                channel_members.append('UKINFGB162')
+
+            channel_index = +1
+            #made up channels
+            channels.append(Channel(channel_id + 1, channel_slack_id + '2', channel_name + '2', channel_members))
+    else:
+        return (False, {})
 
     return (True, channels)
 
 def get_team(url):
     team = None
-    with requests.get(url) as response:
-        r = response.json()
-        if r['ok'] == True:
-            team = Team(0, r['team']['id'], r['team']['name'])
-        else:
-            return (False, None)
+    response = requests.get(url)
+    r = response.json()
+    if r['ok'] == True:
+        team = Team(0, r['team']['id'], r['team']['name'])
+    else:
+        return (False, None)
 
     return (True, team)
 
@@ -271,7 +271,7 @@ def do_it(api_key, threshold = '0', sna_metric = "Degree"):
         sna_data = nx.eigenvector_centrality(G)
     elif sna_metric == "Shortest Path":
         sna_data = nx.betweenness_centrality(G)
-    
+
     for node in graph_info.nodes:
         node["radius"] = sna_data[node["id"]]
 

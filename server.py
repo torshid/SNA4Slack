@@ -1,5 +1,4 @@
 from flask import *
-import socket
 from GraphInfo import do_it
 import os, uuid
 
