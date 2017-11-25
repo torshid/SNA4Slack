@@ -1,29 +1,86 @@
-{% extends "layout.html" %}
-{% block title %} {{ title() }} {% endblock %}
-{% block body %}
-<div class="app">
-    <div class="mt-3">
-        <form action="" method="post">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Socail Network Analysis 4 Slack</title>
+    <!-- Bootstrap core CSS -->
+    <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <style>
+      body {
+        padding-top: 54px;
+      }
+      @media (min-width: 992px) {
+        body {
+          padding-top: 56px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">SNA4Slack</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Services</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 text-center">
+          <h1 class="mt-5">Socail Analysis For Your Slack Channel</h1>
+          <form action="{{ url_for('show') }}"  method="post">
             <div class="form-group">
-                <label>API Key</label>
-                <input type="text" name="key" class="form-control" aria-describedby="slack-key"
-                       placeholder="Slack API key">
-                <small class="form-text text-muted">We'll never share your API key with anyone else.</small>
+              <label for="slack-key">API Key</label>
+              <input type="text" name="slack-key" class="form-control" id="slack-key" aria-describedby="slack-key" placeholder="Enter Slack API key">
+              <small id="slack-key" class="form-text text-muted">We'll never share your API key with anyone else.</small>
             </div>
+            <!--<div class="form-group">
+              <label for="threshold">Threshold</label>
+              <input type="text" name="threshold" class="form-control" id="threshold" placeholder="Threshold">
+            </div>-->
             <div class="form-group">
-                <label>Select SNA metric:</label>
-                <select name="metric" class="form-control">
-                    <option value="degree">Degree</option>
-                    <option value="eigen">Eigenvector</option>
-                    <option value="path">Shortest Path</option>
+                <label for="sna-metric">Select sna-metric:</label>
+                <select name="sna-metric" class="form-control" id="sna-metric">
+                  <option>Degree</option>
+                  <option>Eigenvector</option>
+                  <option>Shortest Path</option>
                 </select>
-            </div>
-            <div class="form-group">
-                <label>Threshold</label>
-                <input type="number" name="threshold" value="0" class="form-control" placeholder="Threshold">
-            </div>
-            <button type="submit" class="btn btn-success">Submit</button>
+              </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
           </form>
+      </div>
     </div>
-</div>
-{% endblock %}
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="static/jquery/jquery.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
