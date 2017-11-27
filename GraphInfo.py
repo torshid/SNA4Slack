@@ -180,27 +180,6 @@ def get_channels(url):
 
             #actual channels
             channels.append(Channel(channel_id, channel_slack_id, channel_name, channel_members))
-
-            #channel_members = []
-
-            if channel_index == 0:
-                channel_members.append('U6344ASD11')
-                channel_members.append('U8764VFD21')
-                channel_members.append('UBFG54BN31')
-                channel_members.append('U87543NN41')
-                channel_members.append('U876454N51')
-                channel_members.append('UKINFGB161')
-            elif channel_index == 1:
-                channel_members.append('U6344ASD12')
-                channel_members.append('U8764VFD22')
-                channel_members.append('UBFG54BN32')
-                channel_members.append('U87543NN42')
-                channel_members.append('U876454N52')
-                channel_members.append('UKINFGB162')
-
-            channel_index = +1
-            #made up channels
-            channels.append(Channel(channel_id + 1, channel_slack_id + '2', channel_name + '2', channel_members))
     else:
         return (False, {})
 
@@ -227,20 +206,7 @@ def do_it(api_key, threshold = '0', sna_metric = "Degree"):
 
     ret, channels = get_channels('https://slack.com/api/channels.list?token={}&pretty=1'.format(api_key))
     ret, usernames = get_usernames('https://slack.com/api/users.list?token={}&pretty=1'.format(api_key))
-
-    usernames['U6344ASD11'] = 'aaaaaa'
-    usernames['U8764VFD21'] = 'bbbbbb'
-    usernames['UBFG54BN31'] = 'cccccc'
-    usernames['U87543NN41'] = 'dddddd'
-    usernames['U876454N51'] = 'eeeeee'
-    usernames['UKINFGB161'] = 'ffffff'
-    usernames['U6344ASD12'] = 'gggggg'
-    usernames['U8764VFD22'] = 'hhhhhh'
-    usernames['UBFG54BN32'] = 'iiiiii'
-    usernames['U87543NN42'] = 'jjjjjj'
-    usernames['U876454N52'] = 'kkkkkk'
-    usernames['UKINFGB162'] = 'llllll'
-
+    
     for channel in channels:
         channel.get_users(users, nodes, edges, usernames)
         channel.get_nodes(users, nodes, edges, usernames)
@@ -274,10 +240,6 @@ def do_it(api_key, threshold = '0', sna_metric = "Degree"):
 
     for node in graph_info.nodes:
         node["radius"] = sna_data[node["id"]]
-
-    if any(i["radius"] < 0.25 for i in graph_info.nodes):
-        for node in graph_info.nodes:
-            node["radius"] *= 3
 
     json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'weights': graph_info.weights, 'sna_metrics': sna_data}, indent = 4, sort_keys = True)
     return json_data
