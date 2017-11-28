@@ -1,8 +1,30 @@
-the steps by which the project works
-1) user enters slack token + sna metric + threshold
-2) flask retrieves the data needed (users, channels, ...) from slack server
-3) flask puts the received data in our data structures (the ones you see in the class diagram)
-4) flask builds the graphs using networkx and sna metric algorithms
-5) flask exports the graph in the json format
-6) the user browser retrieves the json
-7) the JS alchemy library is used to draw the graphs with the json
+[![GitHub license](https://img.shields.io/github/license/torshid/SNA4Slack.svg)](https://github.com/torshid/SNA4Slack/blob/master/LICENSE)
+The socail network analysis for Slack workspaces.
+
+# Getting Started
+
+Follow instuction below in order to setup applicaton.
+
+* Download or clone repository.
+* Start server, using `server.py` file. In order to start server use: `python3 server.py`
+
+# Usage
+In order to get socail network analysis Slack Api Key of your workspace required. This api key can be obtained from Slack api [docs](https://api.slack.com/custom-integrations/legacy-tokens).
+
+After getting Api Key, place it in the form and choose one the appropiate network analysis metric.
+
+### Demo
+In order to test application [demo](https://sna4slack.pythonanywhere.com) page can be used. 
+
+### Builth With
+* Python
+* Flask
+* Alchemyjs
+* Pythonanywhere
+
+### Licence
+* GNU General Public License v3.0
+
+### Version
+* 1.0
+
