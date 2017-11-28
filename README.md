@@ -1,4 +1,5 @@
 [![GitHub license](https://img.shields.io/github/license/torshid/SNA4Slack.svg)](https://github.com/torshid/SNA4Slack/blob/master/LICENSE)
+
 The socail network analysis for Slack workspaces.
 
 # Getting Started
@@ -28,3 +29,10 @@ In order to test application [demo](https://sna4slack.pythonanywhere.com) page c
 ### Version
 * 1.0
 
+### Contributors
+
+* [torshid](https://github.com/torshid)
+* [mhmmtucan](https://github.com/mhmmtucan)
+* [malkoch](https://github.com/malkoch)
+* [yazidabdulsalam](https://github.com/yazidabdulsalam)
+* [alperbry](https://github.com/alperbry)
