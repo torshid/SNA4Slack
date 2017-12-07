@@ -22,8 +22,11 @@
                                       "join",
                                       "contact"]},
             "nodeStyle": {
+                "all": {
+                    borderWidth: 3
+                },
                 "team": {
-                    color: "#00ff0e",
+                    color: "#00ff0e"
                 },
                 "channel":{
                     color: "#00ff0e",
@@ -33,15 +36,26 @@
                     color: "#ff7921",
                     borderColor: "#fff",
                     radius: function(d) {
-                        return d.getProperties().radius * 30 + 10
+                        return d.getProperties().radius
                     },
                     color: function (d) {
-                        return "rgba(255, 0, 0, " + 
-                        (d.getProperties().radius) + " )"
+                        return "rgba(" + (d.getProperties().radius * 5) + ", 0, 0, " + (d.getProperties().radius * 5) + ")"
                     }
                 }
             },
             "edgeStyle": {
+                "all": {
+                    color: "#ffffff",
+                    selected: {
+                        opacity: 1
+                    },
+                    width: function(d) {
+                        return d.getProperties().width
+                    },
+                    color: function(d) {
+                        return "rgba(" + (d.getProperties().width * 25) + ", 255, 255, " + (d.getProperties().width * 25) + ")"
+                    }
+                },
                 "in": {
                     color: "#00fffa",
                     width: 5
@@ -57,6 +71,9 @@
                     },
                     width: function(d) {
                         return d.getProperties().width * 2 
+                    },
+                    color: function(d) {
+                        return "rgba(" + (d.getProperties().width * 100) + "," + (d.getProperties().width * 100) + "," + (d.getProperties().width * 100) + "," + (255) + ")"
                     }
                 }
             }
