@@ -23,7 +23,8 @@
                                       "contact"]},
             "nodeStyle": {
                 "all": {
-                    borderWidth: 3
+                    borderWidth: 1,
+                    borderColor: "white"
                 },
                 "team": {
                     color: "#00ff0e"
@@ -34,26 +35,38 @@
                 },
                 "user": {
                     color: "#ff7921",
-                    borderColor: "#fff",
+                    borderColor: "#ffffff",
                     radius: function(d) {
                         return d.getProperties().radius
                     },
                     color: function (d) {
-                        return "rgba(" + (d.getProperties().radius * 5) + ", 0, 0, " + (d.getProperties().radius * 5) + ")"
+                        //radius is between 10 and 40
+                        //h value will be between 151 and 1
+                        //return "hsl(" + (201 - d.getProperties().radius * 5) + ", 75%, 40%)"
+                        return "hsl(" + (201 - d.getProperties().radius * 5) + ", 100%, 50%)"
+                        //return "rgb(" + (d.getProperties().radius * 5) + ", 0, 0)"
                     }
                 }
             },
             "edgeStyle": {
                 "all": {
                     color: "#ffffff",
+                    opacity: 1,
                     selected: {
-                        opacity: 1
+                        color: "#c6c6c6"
+                    },
+                    highlighted: {
+                        color: "#c6c6c6"
                     },
                     width: function(d) {
                         return d.getProperties().width
                     },
                     color: function(d) {
-                        return "rgba(" + (d.getProperties().width * 25) + ", 255, 255, " + (d.getProperties().width * 25) + ")"
+                        //width is between 2 and 4
+                        //h value will be between 101 and 1
+                        //return "hsl(" + (201 - d.getProperties().width * 50) + ", 75%, 40%)"
+                        return "hsl(" + (201 - d.getProperties().width * 50) + ", 100%, 50%)"
+                        //return "rgb(" + (d.getProperties().width * 50) + ", 0, 0)"
                     }
                 },
                 "in": {
@@ -80,6 +93,12 @@
         };
     
         alchemy.begin(config);
+
+        /*setTimeout(function() {
+            document.getElementById("alchemy").style.background = "lightblue";
+            document.getElementsByTagName("svg")[0].style.background = "lightblue";
+        }, 500)*/
+
       </script>
     </body>
     </html>

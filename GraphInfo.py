@@ -264,11 +264,11 @@ def do_it(api_key, threshold = '0', sna_metric = "Degree"):
     if min_width != max_width:
         for edge in graph_info.edges:
             zero_one = (edge["width"] - min_width) / (max_width - min_width)
-            edge["width"] = 6 * zero_one + 2
+            edge["width"] = 2 * zero_one + 2
             print(edge['width'])
     else:
         for edge in graph_info.edges:
-            edge["width"] = 8
+            edge["width"] = 4
 
     json_data = json.dumps({'nodes': graph_info.nodes, 'edges': graph_info.edges, 'weights': graph_info.weights, 'sna_metrics': sna_data}, indent = 4, sort_keys = True)
     return json_data
